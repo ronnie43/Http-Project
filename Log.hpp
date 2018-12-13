@@ -38,7 +38,7 @@ void Log(int level_, std::string message_, std::string file_, int line_)
     std::cout << "[ " << GetTimeStamp() << " ]" << " [ " << GetLogLevel(level_) << " ]" << " [ " << file_ << " : " << line_ << " ] " << message_ << std::endl;
 }
 
-#define LOG(level, message) Log(level_, message_, __FILE__, __LINE__)
+#define LOG(level_, message_) Log(level_, message_, __FILE__, __LINE__)
 //LOG(INFO, "bind seccuss");
 
 #endif

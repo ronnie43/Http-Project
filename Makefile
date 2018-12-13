@@ -2,16 +2,24 @@ bin=HttpdServer
 cc=g++
 LDFLAGS=-lpthread
 
-.PONY:all
+.PHONY:all
 all:$(bin) cgi
 
 $(bin):HttpdServer.cc
-	   $(cc) -o $@ $^ $(LDFLAGS) -std=c++11
+	   	$(cc) -o  $@ $^ $(LDFLAGS) -std=c++11
 
-.PONY:cgi
+.PHONY:cgi
 cgi:
-	  g++ -o Cal Cal.cc
+	g++ -o Cal Cal.cc
 
 .PHONY:clean
 clean:
-	rm -f $(bin) Cal
+	rm -rf $(bin) Cal output
+
+.PHONY:output
+output:
+	mkdir output
+	cp $(bin) output
+	cp -rf wwwroot output
+	cp Cal output/wwwroot
+	cp start.sh output

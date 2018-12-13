@@ -48,7 +48,7 @@ class ProtocolUtil{
             }
 
             std::string k_ = str_.substr(0, pos);
-            std::string v_ = str_.sunstr(pos+2);
+            std::string v_ = str_.substr(pos+2);
 
             kv_.insert(make_pair(k_, v_));
         }
@@ -132,7 +132,7 @@ class Request{      //每个请求都是一个对象
         }
         void RequestLineParse()
         {
-            stringstream ss(rq_line);
+            std::stringstream ss(rq_line);
             ss >> method >> uri >> version;
         }
         void UriParse()
@@ -167,8 +167,8 @@ class Request{      //每个请求都是一个对象
 
                 std::string sub_string_ = rq_head.substr(start, pos - start);
                 if(!sub_string_.empty()){
-                    LOG(INFO, "substr" is not empty!);
-                    ProtocolUtil::MakeV(head_kv, sub_string_);
+                    LOG(INFO, "substr is not empty!");
+                    ProtocolUtil::MakeKV(head_kv, sub_string_);
                 }
                    else{
                         LOG(INFO, "substr is empty!");
@@ -190,7 +190,7 @@ class Request{      //每个请求都是一个对象
         bool IsMethodLegal()        //判定方法是否成立
         {
             if(strcasecmp(method.c_str(),"GET") == 0 ||\   
-                    cgi = (strcasecmp(method.c_str(),"POST") == 0)){
+                    (cgi = (strcasecmp(method.c_str(),"POST") == 0)) ){
                 return true;
             }
 
@@ -217,7 +217,7 @@ class Request{      //每个请求都是一个对象
             }
 
             resource_size = st.st_size;
-            std::size pos = path.rfind(".");
+            std::size_t pos = path.rfind(".");
             if(std::string::npos != pos){
                 resource_suffix = path.substr(pos);
             }
@@ -239,7 +239,7 @@ class Request{      //每个请求都是一个对象
 };
 
 class Response{
-    private:
+    public:
         std::string rsp_line;
         std::string rsp_head;       //响应报头
         std::string blank;
@@ -262,7 +262,7 @@ class Response{
         void MakeResponseHead(Request *&rq_)
         {
             rsp_head = "Content-Length: ";
-            rsp_head += rotocolUtil::IntToString(rq_->GetResourceSize);
+            rsp_head += ProtocolUtil::IntToString(rq_->GetResourceSize());
             rsp_head += "\n";
             rsp_head += "Content-Type: ";
             std::string suffix_ = rq_->GetSuffix();
@@ -312,7 +312,7 @@ class Connect{      //一个链接
             }
             return line_.size();
         }
-        void RecvRequestHead(std::string &head_)
+        void RecvRequestHead(std::string &head_)    //
         {
             head_ = "";
             std::string line_;
@@ -329,6 +329,7 @@ class Connect{      //一个链接
             while( i_ < len_){
                 recv(sock, &c_, 1, 0);
                 text_.push_back(c_);
+                i_++;
             }
 
             param_ = text_;
@@ -337,7 +338,7 @@ class Connect{      //一个链接
         {
             std::string&rsp_line_ = rsp_->rsp_line;
             std::string&rsp_head_ = rsp_->rsp_head;
-            std::string&blank = rsp_->blank;
+            std::string&blank_ = rsp_->blank;
             
             send(sock, rsp_line_.c_str(), rsp_line_.size(), 0);
             send(sock, rsp_head_.c_str(), rsp_head_.size(), 0);
@@ -408,21 +409,21 @@ class Entry{
                 size_t total_ = 0;
                 size_t curr_ = 0;
                 const char *p_ = param_.c_str();
-                while(total_ < size< &&\
-                        (curr_ write(input[1], p_ + total_, size_ - total_)) > 0){
+                while(total_ < size_ &&\
+                        (curr_ = write(input[1], p_ + total_, size_ - total_)) > 0){
                     total_ += curr_;
                 }
 
                 char c;
                 while(read(output[0], &c, 1) > 0){
-                    rsp_text_.text_.push_back(c);
+                    rsp_text_.push_back(c);
                 }
                 waitpid(id, NULL, 0);
 
-                close(inpt[1]);
+                close(input[1]);
                 close(output[0]);
 
-                rsp_->MakeaStatusLine();
+                rsp_->MakeStatusLine();
                 rq_->SetResourceSize(rsp_text_.size());
                 rsp_->MakeResponseHead(rq_);
 
@@ -509,7 +510,7 @@ class Entry{
             //request recv done!
             ProcessResponse(conn_, rq_, rsp_);
 end:
-            if(code != OK){
+            if(code_ != OK){
 				HandlerError(conn_, rq_, rsp_);
 			}
 			delete conn_;
